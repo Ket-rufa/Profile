@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nguyễn Văn Kết - Portfolio</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Canvas for Sakura Effect -->
+    <canvas id="sakura-canvas"></canvas>
+
+    <div id="app">
+        <!-- Hanging Lanterns -->
+        <div class="lantern-container lantern-left">
+            <div class="lantern-string"></div>
+            <div class="lantern">
+                <span class="lantern-text"></span>
+            </div>
+            <div class="lantern-tassel"></div>
+        </div>
+
+        <div class="lantern-container lantern-right">
+            <div class="lantern-string"></div>
+            <div class="lantern">
+                <span class="lantern-text"></span>
+            </div>
+            <div class="lantern-tassel"></div>
+        </div>
+
+        <!-- Navigation -->
+        <header class="glass">
+            <div class="container">
+                <nav>
+                    <div class="logo">NGUYEN VAN KET</div>
+                    <div class="digital-clock">{{ clock }}</div>
+                    <ul class="nav-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#projects">Projects</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Hero Section -->
+            <section id="home">
+                <div class="profile-container">
+                    <!-- Profile Card -->
+                    <div class="profile-card glass">
+                        <img :src="avatar" alt="Avatar" class="avatar">
+                        <h1>{{ name }}</h1>
+                        <p class="role">{{ role }}</p>
+
+                        <div class="tags">
+                            <span class="tag" v-for="tag in tags" :key="tag">{{ tag }}</span>
+                        </div>
+
+                        <div class="social-icons">
+                            <a v-for="social in socials" :key="social.icon" :href="social.href"><i :class="social.icon"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Profile Image Showcase -->
+                    <div class="hero-3d-box glass">
+                        <img src="img/1.png" alt="Profile showcase" class="hero-profile-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section id="projects">
+                <div class="section-header">
+                    <h2>{{ projectsTitle }}</h2>
+                </div>
+
+                <div class="projects-grid">
+                    <div class="project-card glass" v-for="project in projects" :key="project.title">
+                        <div class="project-img-wrapper">
+                            <img :src="project.img" :alt="project.title" class="project-img">
+                        </div>
+                        <div class="project-body">
+                            <h3>{{ project.title }}</h3>
+                            <p>{{ project.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="glass" style="border-radius: 16px 16px 0 0; margin-bottom: 0;">
+            <div class="container">
+                <p>&copy; {{ year }} Designed by <strong>{{ name }}</strong></p>
+            </div>
+        </footer>
+
+        <!-- Background Music (YouTube Player) -->
+        <div id="youtube-player"></div>
+
+        <div class="music-control glass" @click="toggleMusicAndPlaylist" :class="{ playing: isPlaying }">
+            <i :class="musicIcon"></i>
+        </div>
+
+        <!-- Music Playlist Popup -->
+        <div class="music-playlist" :class="{ show: showPlaylist }">
+            <div class="playlist-header">
+                <h3>Music Player</h3>
+                <i class="fas fa-times close-playlist" @click="hidePlaylist"></i>
+            </div>
+            <div class="current-track">
+                <div id="track-name">{{ currentTrack.title }}</div>
+                <div class="progress-container">
+                    <input type="range" id="progress-bar" min="0" max="100" v-model="progress" @input="seek">
+                </div>
+                <div class="controls">
+                    <i class="fas fa-step-backward" @click="prevTrack"></i>
+                    <i :class="playPauseIcon" @click="toggleMusic"></i>
+                    <i class="fas fa-step-forward" @click="nextTrack"></i>
+                </div>
+            </div>
+            <ul class="playlist-items">
+                <li v-for="(track, index) in playlist" :key="track.videoId" :class="{ active: index === currentTrackIndex }" @click="loadTrack(index)">
+                    <span class="song-title">{{ track.title }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Petal class moved before Vue initialization to avoid ReferenceError
+        class Petal {
+            constructor() {
+                this.x = Math.random() * window.innerWidth;
+                this.y = Math.random() * window.innerHeight - window.innerHeight;
+                this.size = Math.random() * 15 + 5;
+                this.speed = Math.random() * 2 + 1;
+                this.angle = Math.random() * 360;
+                this.spin = Math.random() < 0.5 ? -1 : 1;
+                this.color = `rgba(255, 183, 178, ${Math.random() * 0.5 + 0.3})`;
+            }
+
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.angle * Math.PI / 180) * 1;
+                this.angle += this.spin;
+
+                if (this.y > window.innerHeight) {
+                    this.y = -20;
+                    this.x = Math.random() * window.innerWidth;
+                }
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(this.size / 2, -this.size / 2, this.size, 0, 0, this.size);
+                ctx.bezierCurveTo(-this.size, 0, -this.size / 2, -this.size / 2, 0, 0);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    clock: '00:00',
+                    avatar: 'hero.png',
+                    banner: 'hero.png',
+                    name: 'Nguyễn Văn Kết',
+                    role: 'Full Stack Developer',
+                    tags: ['Designer', 'Developer', 'Freelancer'],
+                    socials: [
+                        { href: '#', icon: 'fab fa-github' },
+                        { href: '#', icon: 'fas fa-envelope' },
+                        { href: '#', icon: 'fab fa-linkedin' },
+                        { href: 'https://www.facebook.com/ket.nguyenvan.587268/', icon: 'fab fa-facebook' }
+                    ],
+                    projectsTitle: 'Featured Projects',
+                    projects: [
+                        {
+                            title: 'E-commerce Platform',
+                            description: 'Website bán hàng trực tuyến tích hợp thanh toán và vận chuyển.',
+                            img: 'https://picsum.photos/seed/shop/400/250'
+                        },
+                        {
+                            title: 'Mobile Application',
+                            description: 'Ứng dụng quản lý tài chính cá nhân trên Android & iOS.',
+                            img: 'https://picsum.photos/seed/app/400/250'
+                        },
+                        {
+                            title: 'Personal Blog',
+                            description: 'Nền tảng chia sẻ kiến thức công nghệ với CMS tự xây dựng.',
+                            img: 'https://picsum.photos/seed/blog/400/250'
+                        }
+                    ],
+                    year: 2026,
+                    showPlaylist: false,
+                    isPlaying: false,
+                    currentTrackIndex: 0,
+                    progress: 0,
+                    playlist: [
+                        { title: "List Nhạc Của Tôi", videoId: "Thf6-faRGI4" },
+                        { title: "At My Worst - Pink Sweat$", videoId: "hjYOanJelUs" },
+                        { title: "YouTube Song", videoId: "ytv0FhrSkfQ" },
+                        { title: "nhiệt huyết tinh cầu", videoId: "j3TbRPUH0iw" }
+                    ],
+                    player: null,
+                    updateTimer: null,
+                    petals: [],
+                    numPetals: 50
+                };
+            },
+            computed: {
+                currentTrack() {
+                    return this.playlist[this.currentTrackIndex];
+                },
+                musicIcon() {
+                    return this.isPlaying ? 'fas fa-compact-disc fa-spin' : 'fas fa-music';
+                },
+                playPauseIcon() {
+                    return this.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+                }
+            },
+            mounted() {
+                this.updateClock();
+                setInterval(this.updateClock, 1000);
+                this.initPetals();
+                this.animate();
+                this.loadYouTubeAPI();
+                window.addEventListener('resize', this.resizeCanvas);
+            },
+            methods: {
+                updateClock() {
+                    const now = new Date();
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    this.clock = `${hours}:${minutes}`;
+                },
+                initPetals() {
+                    const canvas = document.getElementById('sakura-canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    this.petals = [];
+                    for (let i = 0; i < this.numPetals; i++) {
+                        this.petals.push(new Petal());
+                    }
+                },
+                animate() {
+                    const canvas = document.getElementById('sakura-canvas');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    this.petals.forEach(petal => {
+                        petal.update();
+                        petal.draw(ctx);
+                    });
+                    requestAnimationFrame(this.animate);
+                },
+                resizeCanvas() {
+                    const canvas = document.getElementById('sakura-canvas');
+                    if (!canvas) return;
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                },
+                loadYouTubeAPI() {
+                    if (window.YT) {
+                        this.onYouTubeIframeAPIReady();
+                    } else {
+                        const tag = document.createElement('script');
+                        tag.src = "https://www.youtube.com/iframe_api";
+                        const firstScriptTag = document.getElementsByTagName('script')[0];
+                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                        window.onYouTubeIframeAPIReady = this.onYouTubeIframeAPIReady.bind(this);
+                    }
+                },
+                onYouTubeIframeAPIReady() {
+                    console.log('YT object:', typeof YT);
+                    if (typeof YT === 'undefined' || !YT.Player) {
+                        console.error('YouTube API khong duoc tai hoac chua san sang');
+                        // Try again in 100ms
+                        setTimeout(this.onYouTubeIframeAPIReady.bind(this), 100);
+                        return;
+                    }
+                    this.player = new YT.Player('youtube-player', {
+                        height: '1',
+                        width: '1',
+                        videoId: this.currentTrack.videoId,
+                        playerVars: {
+                            'autoplay': 0,
+                            'controls': 0,
+                            'loop': 0,
+                            'origin': window.location.origin
+                        },
+                        events: {
+                            'onReady': this.onPlayerReady.bind(this),
+                            'onStateChange': this.onPlayerStateChange.bind(this),
+                            'onError': this.onPlayerError.bind(this)
+                        }
+                    });
+                },
+                onPlayerReady() {
+                    this.player.setVolume(50);
+                },
+                onPlayerStateChange(event) {
+                    console.log('Player state changed:', event.data);
+                    if (event.data == YT.PlayerState.PLAYING) {
+                        this.isPlaying = true;
+                        this.updateTimer = setInterval(this.updateProgress.bind(this), 1000);
+                    } else {
+                        this.isPlaying = false;
+                        clearInterval(this.updateTimer);
+                        if (event.data == YT.PlayerState.ENDED) {
+                            this.nextTrack();
+                        }
+                    }
+                },
+                updateProgress() {
+                    if (!this.player || !this.isPlaying) return;
+                    try {
+                        const currentTime = this.player.getCurrentTime();
+                        const duration = this.player.getDuration();
+                        if (duration > 0) {
+                            this.progress = (currentTime / duration) * 100;
+                        }
+                    } catch (e) {
+                        console.error("Error updating progress:", e);
+                    }
+                },
+                onPlayerError(event) {
+                    console.error("YouTube Player Error:", event.data);
+                    if (event.data === 150 || event.data === 101) {
+                        alert("Video này không cho phép phát. Đang chuyển bài tiếp theo...");
+                        this.nextTrack();
+                    }
+                },
+                toggleMusicAndPlaylist() {
+                    if (!this.player || typeof this.player.getPlayerState !== 'function') {
+                        this.showPlaylist = !this.showPlaylist;
+                        return;
+                    }
+                    const state = this.player.getPlayerState();
+                    if (state === YT.PlayerState.PLAYING) {
+                        this.player.pauseVideo();
+                    } else {
+                        this.player.playVideo();
+                    }
+                    this.showPlaylist = !this.showPlaylist;
+                },
+                hidePlaylist() {
+                    this.showPlaylist = false;
+                },
+                toggleMusic() {
+                    if (!this.player || typeof this.player.getPlayerState !== 'function') return;
+                    const state = this.player.getPlayerState();
+                    if (state === YT.PlayerState.PLAYING) {
+                        this.player.pauseVideo();
+                    } else {
+                        this.player.playVideo();
+                    }
+                },
+                prevTrack() {
+                    this.currentTrackIndex = (this.currentTrackIndex - 1 + this.playlist.length) % this.playlist.length;
+                    this.loadTrack(this.currentTrackIndex);
+                },
+                nextTrack() {
+                    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.playlist.length;
+                    this.loadTrack(this.currentTrackIndex);
+                },
+                loadTrack(index) {
+                    this.currentTrackIndex = index;
+                    if (this.player && typeof this.player.loadVideoById === 'function') {
+                        this.player.loadVideoById(this.playlist[index].videoId);
+                    }
+                },
+                seek() {
+                    if (this.player && typeof this.player.getDuration === 'function') {
+                        const duration = this.player.getDuration();
+                        const seekTo = (this.progress / 100) * duration;
+                        this.player.seekTo(seekTo, true);
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html></content>
+<parameter name="filePath">K:\web profile\index.html
