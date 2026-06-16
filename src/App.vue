@@ -201,15 +201,52 @@
         </div>
 
         <div class="projects-grid">
-          <div class="project-card glass" v-for="project in projects" :key="project.title">
+          <a
+            class="project-card glass project-link-card"
+            v-for="project in projects"
+            :key="project.title"
+            :href="project.link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <div class="project-img-wrapper">
               <img :src="project.img" :alt="project.title" class="project-img" />
             </div>
             <div class="project-body">
               <h3>{{ project.title }}</h3>
               <p>{{ project.description }}</p>
+              <span class="project-github-link">Xem project trên GitHub <i class="fas fa-arrow-up-right-from-square"></i></span>
             </div>
-          </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <section id="contact">
+        <div class="section-header">
+          <h2>Liên hệ với <span>tôi</span></h2>
+          <p class="section-subtitle">Hãy kết nối với tôi qua các kênh dưới đây để trao đổi công việc, hợp tác hoặc đơn giản là chào hỏi.</p>
+        </div>
+
+        <div class="contact-grid">
+          <a
+            v-for="contact in contacts"
+            :key="contact.label"
+            :href="contact.href"
+            :target="contact.target"
+            rel="noopener noreferrer"
+            class="contact-card glass"
+            :style="{ '--contact-color': contact.color }"
+          >
+            <div class="contact-icon">
+              <i :class="contact.icon"></i>
+            </div>
+            <div class="contact-info">
+              <h3>{{ contact.label }}</h3>
+              <p>{{ contact.value }}</p>
+            </div>
+            <i class="fas fa-arrow-up-right-from-square contact-arrow"></i>
+          </a>
         </div>
       </section>
     </div>
@@ -280,19 +317,61 @@ export default {
           title: 'gametetris',
           description: 'Dự án game Tetris được xây dựng bằng C++, mô phỏng trò chơi xếp gạch cổ điển với giao diện đơn giản và dễ chơi.',
           img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=900&q=80',
-          link: 'https://github.com/Ket-rufa/gametetris'
+          link: 'https://github.com/Ket-rufa/game-tetris'
         },
         {
-          title: 'web_tmdt',
-          description: 'Website thương mại điện tử bán hàng trực tuyến, hiển thị sản phẩm và giao diện mua sắm thân thiện với người dùng.',
-          img: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=900&q=80',
-          link: 'https://github.com/Ket-rufa/web_tmdt'
+          title: 'Profile',
+          description: 'Website profile cá nhân giới thiệu thông tin, kỹ năng, dự án và cách liên hệ theo phong cách hiện đại.',
+          img: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
+          link: 'https://github.com/Ket-rufa/Profile'
         },
         {
           title: 'cham_soc_cay_trong',
           description: 'Ứng dụng chăm sóc cây trồng phát triển bằng Dart, hỗ trợ quản lý và theo dõi quá trình chăm sóc cây.',
           img: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=900&q=80',
           link: 'https://github.com/Ket-rufa/cham_soc_cay_trong'
+        }
+      ],
+      contacts: [
+        {
+          label: 'Facebook',
+          value: 'ket.nguyenvan.587268',
+          icon: 'fab fa-facebook-f',
+          href: 'https://www.facebook.com/ket.nguyenvan.587268/',
+          target: '_blank',
+          color: '#1877F2'
+        },
+        {
+          label: 'Zalo',
+          value: '0348644630',
+          icon: 'fas fa-comment-dots',
+          href: 'https://zalo.me/0348644630',
+          target: '_blank',
+          color: '#0068FF'
+        },
+        {
+          label: 'Telegram',
+          value: '@ketrufa',
+          icon: 'fab fa-telegram-plane',
+          href: 'https://t.me/ketrufa',
+          target: '_blank',
+          color: '#229ED9'
+        },
+        {
+          label: 'Instagram',
+          value: '@v.k3t_',
+          icon: 'fab fa-instagram',
+          href: 'https://www.instagram.com/v.k3t_/',
+          target: '_blank',
+          color: '#E1306C'
+        },
+        {
+          label: 'Gmail',
+          value: 'nket865@gmail.com',
+          icon: 'fas fa-envelope',
+          href: 'mailto:nket865@gmail.com',
+          target: '_self',
+          color: '#EA4335'
         }
       ]
     };
@@ -339,7 +418,23 @@ export default {
 
 <style>
 /* Global resets or variables can be kept here if needed */
+.project-link-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.project-github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-weight: 600;
+}
 </style>
+
+
+
 
 
 
